@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Xml;
 using System.Xml.Serialization;
@@ -60,8 +61,14 @@ namespace MebelTelegramBot {
             return null;
         }
 
-        public bool Bind() {
-            return true;
+        public bool Bind(long id, string name) {
+            var employees = GetEmployees();
+            var employee = employees.FirstOrDefault(e => e.Name == name);
+            if (employee != null) {
+                employee.ChatID = id;
+                return true;
+            }
+            return false;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MihaZupan;
+﻿using MebelTelegramBot.Users;
+using MihaZupan;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,16 +15,21 @@ namespace MebelTelegramBot {
 
         const long BORIS_ID = 193369564;
 
-        static Dictionary<long, Admin> users = new Dictionary<long, Admin>();
+        static Dictionary<long, IUser> users = new Dictionary<long, IUser>();
+
+        static EmployeeManager employeeManager;
 
         static void Main(string[] args) {
-
+            employeeManager = new EmployeeManager();
             //var proxy = new HttpToSocks5Proxy("45.55.230.207", 30405);
             //botClient = new TelegramBotClient("755174490:AAGr0dyLPskL3UL3HyUeJbqXVXpijKj7hCI", proxy)
 
             botClient = new TelegramBotClient("755174490:AAGr0dyLPskL3UL3HyUeJbqXVXpijKj7hCI") {
                 Timeout = TimeSpan.FromSeconds(10)
             };
+
+            users.Add(BORIS_ID, new Admin(botClient, BORIS_ID));
+
 
             var me = botClient.GetMeAsync().Result;
             Console.WriteLine($"Bot Id: {me.Id}. Bot Name: {me.FirstName}");
@@ -48,6 +54,8 @@ namespace MebelTelegramBot {
         //pack://application:,,,/Fonts/#Digital-7 Mono
 
         private async static void BotClient_OnMessage(object sender, MessageEventArgs e) {
+            UpdateUsers();
+
             var text = e?.Message?.Text;
             var id = e.Message.Chat.Id;
             //var id = e.Message.From.Id;
@@ -56,10 +64,13 @@ namespace MebelTelegramBot {
             if (text == null)
                 return;
 
-            if (!users.ContainsKey(id)) {
-                users.Add(id, new Admin(botClient, id));
+            if (users.ContainsKey(id)) {
+                await users[id].ProcessMessage(text);
             }
-            await users[id].ProcessMessage(text);
+            else {
+                await new Anonymous(botClient, id).ProcessMessage(text);
+            }
+
 
             //if (e?.Message?.Chat.Id == 193369564) {
             //    await botClient.SendTextMessageAsync(
@@ -67,12 +78,19 @@ namespace MebelTelegramBot {
             //    text: $"Борис только что написал: '{text}'"
             //    ).ConfigureAwait(false);
 
-                //    await botClient.SendTextMessageAsync(
-                //    chatId: e?.Message?.Chat.Id,
-                //    text: $"You said '{text}'",
-                //    replyMarkup: markupBoris
-                //    ).ConfigureAwait(false);
-                //}
-            }
+            //    await botClient.SendTextMessageAsync(
+            //    chatId: e?.Message?.Chat.Id,
+            //    text: $"You said '{text}'",
+            //    replyMarkup: markupBoris
+            //    ).ConfigureAwait(false);
+            //}
+        }
+
+        private static void UpdateUsers() {
+            var registeredUsers = employeeManager.GetEmployees();
+            var managers = users.Where(u => u.Value.GetType() == typeof(Manager)).Select(u => u.Value).ToList();
+            managers.ForEach(m => users.Remove(m.Id));
+            managers.ForEach(m => users.Add(m.Id, m));
+        }
     }
 }

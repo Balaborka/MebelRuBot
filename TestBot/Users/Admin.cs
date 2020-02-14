@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MebelTelegramBot.Users;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,11 +8,9 @@ using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MebelTelegramBot {
-    public class Admin {
+    public class Admin : IUser {
 
         ITelegramBotClient botClient;
-        long id;
-
         string textReturn = "Return";
         string textGet_Employees = "Get Employees";
         string textAdd_User = "Add User";
@@ -21,10 +20,12 @@ namespace MebelTelegramBot {
 
         public Admin(ITelegramBotClient botClient, long id) {
             this.botClient = botClient;
-            this.id = id;
+            this.Id = id;
         }
 
         private AdminState adminState = AdminState.Start;
+
+        public long Id { get; set; }
 
         public async Task ProcessMessage(string text) {
             if (text == textReturn) {
@@ -63,13 +64,13 @@ namespace MebelTelegramBot {
             var employees = new EmployeeManager().GetEmployees().Select(i => i.Name).Aggregate((i, j) => i + Environment.NewLine + j);
             if (!string.IsNullOrEmpty(employees)) {
                 await botClient.SendTextMessageAsync(
-                      chatId: id,
+                      chatId: Id,
                       text: employees
                 ).ConfigureAwait(false);
             }
             else {
                 await botClient.SendTextMessageAsync(
-                      chatId: id,
+                      chatId: Id,
                       text: "Сотрудников нет"
                 ).ConfigureAwait(false);
             }
@@ -80,7 +81,7 @@ namespace MebelTelegramBot {
             if (text == textConfirm) {
                 adminState = AdminState.Start;
                 await botClient.SendTextMessageAsync(
-                      chatId: id,
+                      chatId: Id,
                       text: "Вы удалили сотрудника"
                 ).ConfigureAwait(false);
                 await AdminStart();
@@ -92,7 +93,7 @@ namespace MebelTelegramBot {
             if (text == textConfirm) {
                 adminState = AdminState.Start;
                 await botClient.SendTextMessageAsync(
-                      chatId: id,
+                      chatId: Id,
                       text: "Вы добавили нового сотрудника"
                 ).ConfigureAwait(false);
                 await AdminStart();
@@ -126,7 +127,7 @@ namespace MebelTelegramBot {
                 new KeyboardButton() { Text = "Return" } }, true
             );
             await botClient.SendTextMessageAsync(
-                  chatId: id,
+                  chatId: Id,
                   text: $"Удалить сотрудника '{text}'?",
                   replyMarkup: markupConfirmReturn
             ).ConfigureAwait(false);
@@ -144,7 +145,7 @@ namespace MebelTelegramBot {
              );
 
             await botClient.SendTextMessageAsync(
-                  chatId: id,
+                  chatId: Id,
                   text: "Выберете команду",
                   replyMarkup: markupAdminStart
             ).ConfigureAwait(false);
@@ -158,7 +159,7 @@ namespace MebelTelegramBot {
              );
 
             await botClient.SendTextMessageAsync(
-                  chatId: id,
+                  chatId: Id,
                   text: "Введите ФИО нового сотрудника",
                   replyMarkup: markupReturn
             ).ConfigureAwait(false);
@@ -171,7 +172,7 @@ namespace MebelTelegramBot {
                 new KeyboardButton() { Text = textReturn } }, true
             );
             await botClient.SendTextMessageAsync(
-                  chatId: id,
+                  chatId: Id,
                   text: $"Добавить сотрудника '{text}'?",
                   replyMarkup: markupConfirmReturn
             ).ConfigureAwait(false);
@@ -185,7 +186,7 @@ namespace MebelTelegramBot {
              );
 
             await botClient.SendTextMessageAsync(
-                  chatId: id,
+                  chatId: Id,
                   text: "Введите ФИО сотрудника для удаления",
                   replyMarkup: markupReturn
             ).ConfigureAwait(false);
