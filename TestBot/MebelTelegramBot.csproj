@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="HttpToSocks5Proxy" Version="1.4.0" />
+    <PackageReference Include="Telegram.Bot" Version="15.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Data\Employees.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>
