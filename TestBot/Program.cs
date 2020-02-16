@@ -21,15 +21,15 @@ namespace MebelTelegramBot {
 
         static void Main(string[] args) {
             employeeManager = new EmployeeManager();
-            //var proxy = new HttpToSocks5Proxy("45.55.230.207", 30405);
-            //botClient = new TelegramBotClient("755174490:AAGr0dyLPskL3UL3HyUeJbqXVXpijKj7hCI", proxy)
+            //var proxy = new HttpToSocks5Proxy("138.197.157.45", 1080);
+            //botClient = new TelegramBotClient("755174490:AAGr0dyLPskL3UL3HyUeJbqXVXpijKj7hCI", proxy) {
 
             botClient = new TelegramBotClient("755174490:AAGr0dyLPskL3UL3HyUeJbqXVXpijKj7hCI") {
-                Timeout = TimeSpan.FromSeconds(10)
+                Timeout = TimeSpan.FromSeconds(10) 
             };
 
             users.Add(BORIS_ID, new Admin(botClient, BORIS_ID));
-
+            
 
             var me = botClient.GetMeAsync().Result;
             Console.WriteLine($"Bot Id: {me.Id}. Bot Name: {me.FirstName}");
@@ -68,9 +68,9 @@ namespace MebelTelegramBot {
                 await users[id].ProcessMessage(text);
             }
             else {
-                await new Anonymous(botClient, id).ProcessMessage(text);
+                var anon = new Anonymous(botClient, id);
+                await anon.ProcessMessage(text);
             }
-
 
             //if (e?.Message?.Chat.Id == 193369564) {
             //    await botClient.SendTextMessageAsync(

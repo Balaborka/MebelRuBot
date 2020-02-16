@@ -19,6 +19,14 @@ namespace MebelTelegramBot.Users {
             employeManager = new EmployeeManager();
         }
 
+        public async Task ProcessMessage(string text) {
+            var sucsess = employeManager.Bind(Id, text);
+            if (sucsess) {
+                await ApproveNameMessage();
+            }
+            else await RequestNameMessage();
+        }
+
         async Task RequestNameMessage() {
             await botClient.SendTextMessageAsync(
                       chatId: Id,
@@ -31,14 +39,6 @@ namespace MebelTelegramBot.Users {
                       chatId: Id,
                       text: "Вы авторизованы!"
                 ).ConfigureAwait(false);
-        }
-
-        public async Task ProcessMessage(string text) {
-            var sucsess = employeManager.Bind(Id, text);    
-            if (sucsess) {
-                await ApproveNameMessage();
-            }
-            else await RequestNameMessage();
         }
     }
 }

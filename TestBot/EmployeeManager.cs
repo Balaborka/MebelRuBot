@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MebelTelegramBot.Models;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -64,11 +65,15 @@ namespace MebelTelegramBot {
         public bool Bind(long id, string name) {
             var employees = GetEmployees();
             var employee = employees.FirstOrDefault(e => e.Name == name);
-            if (employee != null) {
+            if (employee != null && employee.ChatID == 0) {
                 employee.ChatID = id;
                 return true;
             }
             return false;
+        }
+
+        public void SendSummary(Summary sum) {
+           
         }
     }
 }

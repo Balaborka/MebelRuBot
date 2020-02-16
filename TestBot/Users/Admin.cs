@@ -9,6 +9,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MebelTelegramBot {
     public class Admin : IUser {
+        public long Id { get; set; }
 
         ITelegramBotClient botClient;
         string textReturn = "Return";
@@ -17,15 +18,12 @@ namespace MebelTelegramBot {
         string textRemove_User = "Remove User";
         string textResults = "Results";
         string textConfirm = "Confirm";
+        AdminState adminState = AdminState.Start;
 
         public Admin(ITelegramBotClient botClient, long id) {
             this.botClient = botClient;
             this.Id = id;
         }
-
-        private AdminState adminState = AdminState.Start;
-
-        public long Id { get; set; }
 
         public async Task ProcessMessage(string text) {
             if (text == textReturn) {
