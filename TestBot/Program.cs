@@ -21,7 +21,10 @@ namespace MebelTelegramBot {
 
         static void Main(string[] args) {
             employeeManager = new EmployeeManager();
-            //var proxy = new HttpToSocks5Proxy("138.197.157.45", 1080);
+
+            //var proxy = new HttpToSocks5Proxy("103.194.171.156", 8888);
+            //proxy.ResolveHostnamesLocally = true;
+
             //botClient = new TelegramBotClient("755174490:AAGr0dyLPskL3UL3HyUeJbqXVXpijKj7hCI", proxy) {
 
             botClient = new TelegramBotClient("755174490:AAGr0dyLPskL3UL3HyUeJbqXVXpijKj7hCI") {
@@ -29,7 +32,6 @@ namespace MebelTelegramBot {
             };
 
             users.Add(BORIS_ID, new Admin(botClient, BORIS_ID));
-            
 
             var me = botClient.GetMeAsync().Result;
             Console.WriteLine($"Bot Id: {me.Id}. Bot Name: {me.FirstName}");
@@ -88,9 +90,10 @@ namespace MebelTelegramBot {
 
         private static void UpdateUsers() {
             var registeredUsers = employeeManager.GetEmployees();
+
             var managers = users.Where(u => u.Value.GetType() == typeof(Manager)).Select(u => u.Value).ToList();
             managers.ForEach(m => users.Remove(m.Id));
-            managers.ForEach(m => users.Add(m.Id, m));
+            registeredUsers.ForEach(m => users.Add(m.ChatID, new Manager(botClient, m.ChatID)));
         }
     }
 }

@@ -67,6 +67,12 @@ namespace MebelTelegramBot {
             var employee = employees.FirstOrDefault(e => e.Name == name);
             if (employee != null && employee.ChatID == 0) {
                 employee.ChatID = id;
+
+                XmlSerializer serializer = new XmlSerializer(typeof(List<Employee>), new XmlRootAttribute("employees"));
+
+                using (FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate)) {
+                    serializer.Serialize(fileStream, employees);
+                }
                 return true;
             }
             return false;

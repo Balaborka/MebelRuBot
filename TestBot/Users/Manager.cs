@@ -65,7 +65,15 @@ namespace MebelTelegramBot.Users {
         async Task RequestSummarytMessage() {
             await botClient.SendTextMessageAsync(
                       chatId: Id,
-                      text: "Введите сводку из четырех чисел: " + Environment.NewLine + "Лиды, КЭВ Назначенных, КЭВ Проведенных, Сделок." + Environment.NewLine + "Вводите значения через запятую в соответствующем порядке."
+                      text: "Введите сводку из четырех чисел: " + Environment.NewLine + 
+                      "Лиды," + 
+                      Environment.NewLine + 
+                      "КЭВ Назначенных," + 
+                      Environment.NewLine + 
+                      "КЭВ Проведенных, Сделок." + 
+                      Environment.NewLine + 
+                      Environment.NewLine + 
+                      "Вводите значения через запятую в соответствующем порядке."
                 ).ConfigureAwait(false);
         }
 

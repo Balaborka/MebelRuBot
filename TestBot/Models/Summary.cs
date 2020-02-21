@@ -24,8 +24,6 @@ namespace MebelTelegramBot.Models {
             Id = id;
             Date = DateTime.Now;
             Lead = summaryes[0]; Appointed = summaryes[1]; Committed = summaryes[2]; Deal = summaryes[3];
-
-            //Method Validate
         }
 
         public string Validate() {
