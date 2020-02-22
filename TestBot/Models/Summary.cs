@@ -5,12 +5,6 @@ using System.Text;
 namespace MebelTelegramBot.Models {
     public class Summary {
 
-        //Правила заполнения:
-        //Лиды  > КЭВ Назначил = false
-        //КЭВ Назначил < КЭВ Проведенных = false
-        //Сделок > КЭВ Проведенных = false
-        //Сделок < КЭВ Проведенных = false
-
         public int Lead { get; set; }
         public int Appointed { get; set; }
         public int Committed { get; set; }
@@ -29,14 +23,14 @@ namespace MebelTelegramBot.Models {
         public string Validate() {
             result = null;
 
-            if (Lead > Appointed)
-                result = $"{Lead} Лидов больше чем {Appointed} КЭВ назначенных." + Environment.NewLine; 
+            if (Appointed > Lead)
+                result = $"{Appointed} КЭВ назначенных > {Lead} Лидов." + Environment.NewLine; 
             if (Committed > Appointed)
-                result = result + $"{Committed} КЭВ проведенных больше чем {Appointed} КЭВ назначенных." + Environment.NewLine;
+                result = result + $"{Committed} КЭВ проведенных > {Appointed} КЭВ назначенных." + Environment.NewLine;
             if (Deal > Appointed)
-                result = result + $"{Deal} Сделок больше чем {Appointed} КЭВ назначенных." + Environment.NewLine;
-            if (Committed > Deal)
-                result = result + $"{Committed} КЭВ проведенных больше чем {Deal} сделок." + Environment.NewLine;
+                result = result + $"{Deal} Сделок > {Appointed} КЭВ назначенных." + Environment.NewLine;
+            if (Deal > Committed)
+                result = result + $"{Deal} Cделок > {Committed} КЭВ проведенных." + Environment.NewLine;
 
             return result;
         }

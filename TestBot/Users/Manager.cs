@@ -26,9 +26,6 @@ namespace MebelTelegramBot.Users {
         }
 
         public async Task ProcessMessage(string text) {
-            //int countNumbers = text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
-            //if (countNumbers == 4)
-
             if (managerState == ManagerState.Start) {
                 string[] arrayWords = text.Split(',');
                 List<int> arrayNumbers = new List<int>();
@@ -65,25 +62,30 @@ namespace MebelTelegramBot.Users {
         async Task RequestSummarytMessage() {
             await botClient.SendTextMessageAsync(
                       chatId: Id,
-                      text: "Введите сводку из четырех чисел: " + Environment.NewLine + 
-                      "Лиды," + 
-                      Environment.NewLine + 
-                      "КЭВ Назначенных," + 
-                      Environment.NewLine + 
-                      "КЭВ Проведенных, Сделок." + 
-                      Environment.NewLine + 
-                      Environment.NewLine + 
-                      "Вводите значения через запятую в соответствующем порядке."
+                      text: "Введите сводку из четырех чисел: " + 
+                            Environment.NewLine +
+                            Environment.NewLine +
+                            "Лиды," + 
+                            Environment.NewLine + 
+                            "КЭВ Назначенных," + 
+                            Environment.NewLine + 
+                            "КЭВ Проведенных," +
+                            Environment.NewLine +
+                            "Сделок." + 
+                            Environment.NewLine + 
+                            Environment.NewLine + 
+                            "Вводите значения через запятую в соответствующем порядке.",
+                      replyMarkup: null
                 ).ConfigureAwait(false);
         }
 
         async Task ConfirmSendResultsMessage(string text) {
+            managerState = ManagerState.Confirm;
+
             var markupConfirmReturn = new ReplyKeyboardMarkup(new List<KeyboardButton>() {
                 new KeyboardButton() { Text = textConfirm },
                 new KeyboardButton() { Text = textReturn } }, true
             );
-
-            managerState = ManagerState.Start;
 
             if (text == null) {
                 await botClient.SendTextMessageAsync(
@@ -95,7 +97,12 @@ namespace MebelTelegramBot.Users {
             else {
                 await botClient.SendTextMessageAsync(
                       chatId: Id,
-                      text: "Внимание!" + Environment.NewLine + text + "Отправить эти результаты?",
+                      text: "Внимание!" + 
+                            Environment.NewLine +
+                            Environment.NewLine + 
+                            text +
+                            Environment.NewLine +
+                            "Отправить эти результаты?",
                       replyMarkup: markupConfirmReturn
                 ).ConfigureAwait(false);
             }
@@ -105,7 +112,8 @@ namespace MebelTelegramBot.Users {
             new EmployeeManager().SendSummary(sum);
             await botClient.SendTextMessageAsync(
                       chatId: Id,
-                      text: $"Сводка от {DateTime.Now} успешно отправлены"
+                      text: $"Сводка от {DateTime.Now} успешно отправлены",
+                      replyMarkup: null
                 ).ConfigureAwait(false);
         }
     }
