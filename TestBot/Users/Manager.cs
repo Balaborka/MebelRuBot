@@ -110,6 +110,9 @@ namespace MebelTelegramBot.Users {
 
         async Task ConfirmSendResultsMessage(Summary sum) {
             new EmployeeManager().SendSummary(sum);
+
+            managerState = ManagerState.Start;
+
             await botClient.SendTextMessageAsync(
                       chatId: Id,
                       text: $"Сводка от {DateTime.Now} успешно отправлены",
