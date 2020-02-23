@@ -1,4 +1,6 @@
-﻿using MebelTelegramBot.Users;
+﻿using MebelTelegramBot.Managers;
+using MebelTelegramBot.Models;
+using MebelTelegramBot.Users;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,8 +10,8 @@ using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace MebelTelegramBot {
-    public class Admin : IUser {
-        public long Id { get; set; }
+    public class AdminMsgProcessor : IMsgProcessor {
+        public Admin Employee { get; set; }
 
         ITelegramBotClient botClient;
         string textReturn = "Return";
@@ -18,11 +20,10 @@ namespace MebelTelegramBot {
         string textRemove_User = "Remove User";
         string textResults = "Results";
         string textConfirm = "Confirm";
-        AdminState adminState = AdminState.Start;
 
-        public Admin(ITelegramBotClient botClient, long id) {
+        public AdminMsgProcessor(ITelegramBotClient botClient, Employee employee) {
             this.botClient = botClient;
-            this.Id = id;
+            Employee = (Admin)employee;
         }
 
         public async Task ProcessMessage(string text) {
@@ -32,7 +33,7 @@ namespace MebelTelegramBot {
             else if (text == textGet_Employees) {
                 await GetEmployeesCommad();
             }
-            else if (adminState == AdminState.Start) {
+            else if (Employee.State == AdminState.Start) {
                 if (text == textAdd_User) {
                     await AddEmployeeMessage();
                 }
@@ -45,30 +46,31 @@ namespace MebelTelegramBot {
                 }
                 else await AdminStart();
             }
-            else if (adminState == AdminState.Add) {
+            else if (Employee.State == AdminState.Add) {
                 await ValidateName(text);
             }
-            else if (adminState == AdminState.ConfirmAdd) {
+            else if (Employee.State == AdminState.ConfirmAdd) {
                 await AddEmployeeCommand(text);
             }
-            else if (adminState == AdminState.Remove) {
+            else if (Employee.State == AdminState.Remove) {
                 await ValidateName(text);
             }
-            else if (adminState == AdminState.ConfirmRemove) {
+            else if (Employee.State == AdminState.ConfirmRemove) {
                 await RemoveEmployeeCommand(text);
             }
         }
         async Task GetEmployeesCommad() {
-            var employees = new EmployeeManager().GetEmployees().Select(i => i.Name).Aggregate((i, j) => i + Environment.NewLine + j);
+            List<Employee> list = new EmployeeManager().Get();
+            var employees = list.Select(i => i.Name).Aggregate((i, j) => i + Environment.NewLine + j);
             if (!string.IsNullOrEmpty(employees)) {
                 await botClient.SendTextMessageAsync(
-                      chatId: Id,
+                      chatId: Employee.Id,
                       text: employees
                 ).ConfigureAwait(false);
             }
             else {
                 await botClient.SendTextMessageAsync(
-                      chatId: Id,
+                      chatId: Employee.Id,
                       text: "Сотрудников нет"
                 ).ConfigureAwait(false);
             }
@@ -77,9 +79,9 @@ namespace MebelTelegramBot {
 
         async Task RemoveEmployeeCommand(string text) {
             if (text == textConfirm) {
-                adminState = AdminState.Start;
+                Employee.State = AdminState.Start;
                 await botClient.SendTextMessageAsync(
-                      chatId: Id,
+                      chatId: Employee.Id,
                       text: "Вы удалили сотрудника"
                 ).ConfigureAwait(false);
                 await AdminStart();
@@ -89,9 +91,9 @@ namespace MebelTelegramBot {
 
         async Task AddEmployeeCommand(string text) {
             if (text == textConfirm) {
-                adminState = AdminState.Start;
+                Employee.State = AdminState.Start;
                 await botClient.SendTextMessageAsync(
-                      chatId: Id,
+                      chatId: Employee.Id,
                       text: "Вы добавили нового сотрудника"
                 ).ConfigureAwait(false);
                 await AdminStart();
@@ -101,14 +103,14 @@ namespace MebelTelegramBot {
 
         async Task ValidateName(string text) {
             int countWords = text.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries).Length;
-            if (adminState == AdminState.Add) {
+            if (Employee.State == AdminState.Add) {
                 if (countWords == 3) {
-                    new EmployeeManager().Add(text);
+                    new EmployeeManager().Add(new Employee() { Name = text });
                     await ConfirmAddEmployeeMessage(text);
                 }
                 else await AddEmployeeMessage();
             }
-            else if (adminState == AdminState.Remove) {
+            else if (Employee.State == AdminState.Remove) {
                 if (countWords == 3) {
                     new EmployeeManager().Remove(text);
                     await ConfirmRemoveEmployeeMessage(text);
@@ -118,21 +120,21 @@ namespace MebelTelegramBot {
         }
 
         async Task ConfirmRemoveEmployeeMessage(string text) {
-            adminState = AdminState.ConfirmRemove;
+            Employee.State = AdminState.ConfirmRemove;
 
             var markupConfirmReturn = new ReplyKeyboardMarkup(new List<KeyboardButton>() {
                 new KeyboardButton() { Text = "Confirm" },
                 new KeyboardButton() { Text = "Return" } }, true
             );
             await botClient.SendTextMessageAsync(
-                  chatId: Id,
+                  chatId: Employee.Id,
                   text: $"Удалить сотрудника '{text}'?",
                   replyMarkup: markupConfirmReturn
             ).ConfigureAwait(false);
         }
 
         async Task AdminStart() {
-            adminState = AdminState.Start;
+            Employee.State = AdminState.Start;
 
             var markupAdminStart = new ReplyKeyboardMarkup(new List<KeyboardButton>() {
                 new KeyboardButton() { Text = textAdd_User,  },
@@ -143,55 +145,55 @@ namespace MebelTelegramBot {
              );
 
             await botClient.SendTextMessageAsync(
-                  chatId: Id,
+                  chatId: Employee.Id,
                   text: "Выберете команду",
                   replyMarkup: markupAdminStart
             ).ConfigureAwait(false);
         }
 
         async Task AddEmployeeMessage() {
-            adminState = AdminState.Add;
+            Employee.State = AdminState.Add;
 
             var markupReturn = new ReplyKeyboardMarkup(new List<KeyboardButton>() {
                 new KeyboardButton() { Text = textResults } }, true
              );
 
             await botClient.SendTextMessageAsync(
-                  chatId: Id,
+                  chatId: Employee.Id,
                   text: "Введите ФИО нового сотрудника",
                   replyMarkup: markupReturn
             ).ConfigureAwait(false);
         }
         async Task ConfirmAddEmployeeMessage(string text) {
-            adminState = AdminState.ConfirmAdd;
+            Employee.State = AdminState.ConfirmAdd;
 
             var markupConfirmReturn = new ReplyKeyboardMarkup(new List<KeyboardButton>() {
                 new KeyboardButton() { Text = textConfirm },
                 new KeyboardButton() { Text = textReturn } }, true
             );
             await botClient.SendTextMessageAsync(
-                  chatId: Id,
+                  chatId: Employee.Id,
                   text: $"Добавить сотрудника '{text}'?",
                   replyMarkup: markupConfirmReturn
             ).ConfigureAwait(false);
         }
 
         async Task RemoveEmployeeMessage() {
-            adminState = AdminState.Remove;
+            Employee.State = AdminState.Remove;
 
             var markupReturn = new ReplyKeyboardMarkup(new List<KeyboardButton>() {
                 new KeyboardButton() { Text = textReturn } }, true
              );
 
             await botClient.SendTextMessageAsync(
-                  chatId: Id,
+                  chatId: Employee.Id,
                   text: "Введите ФИО сотрудника для удаления",
                   replyMarkup: markupReturn
             ).ConfigureAwait(false);
         }
 
         async Task ShowResults() {
-            adminState = AdminState.Start;
+            Employee.State = AdminState.Start;
         }
     }
 }

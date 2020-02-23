@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 
 namespace MebelTelegramBot.Enums {
-    enum ManagerState {
+    public enum ManagerState {
         Start,
         Confirm
     }

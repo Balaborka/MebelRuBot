@@ -9,6 +9,6 @@ namespace MebelTelegramBot {
         [XmlAttribute("name")]
         public string Name { get; set; }
         [XmlAttribute("id")]
-        public long ChatID { get; set; }
+        public long Id { get; set; }
     }
 }

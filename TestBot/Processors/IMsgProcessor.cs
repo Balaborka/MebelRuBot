@@ -4,8 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace MebelTelegramBot.Users {
-    public interface IUser {
-        long Id { get; set; }
+    public interface IMsgProcessor {
         Task ProcessMessage(string text);
     }
 }

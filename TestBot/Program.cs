@@ -1,4 +1,7 @@
-﻿using MebelTelegramBot.Users;
+﻿using MebelTelegramBot.Managers;
+using MebelTelegramBot.Models;
+using MebelTelegramBot.Users;
+using MebelTelegramBot.Processors;
 using MihaZupan;
 using System;
 using System.Collections.Generic;
@@ -15,11 +18,13 @@ namespace MebelTelegramBot {
 
         const long BORIS_ID = 193369564;
 
-        static Dictionary<long, IUser> users = new Dictionary<long, IUser>();
+        //static Dictionary<long, IUser> users = new Dictionary<long, IUser>();
 
         static EmployeeManager employeeManager;
 
         static void Main(string[] args) {
+            MebelRuBotContext.Init();
+
             employeeManager = new EmployeeManager();
 
             //var proxy = new HttpToSocks5Proxy("103.194.171.156", 8888);
@@ -31,7 +36,8 @@ namespace MebelTelegramBot {
                 Timeout = TimeSpan.FromSeconds(10) 
             };
 
-            users.Add(BORIS_ID, new Admin(botClient, BORIS_ID));
+            //users.Add(BORIS_ID, new Admin(botClient, BORIS_ID));
+            employeeManager.Add(new Admin() { Id = BORIS_ID });
 
             var me = botClient.GetMeAsync().Result;
             Console.WriteLine($"Bot Id: {me.Id}. Bot Name: {me.FirstName}");
@@ -56,7 +62,7 @@ namespace MebelTelegramBot {
         //pack://application:,,,/Fonts/#Digital-7 Mono
 
         private async static void BotClient_OnMessage(object sender, MessageEventArgs e) {
-            UpdateUsers();
+            //UpdateUsers();
 
             var text = e?.Message?.Text;
             var id = e.Message.Chat.Id;
@@ -66,11 +72,13 @@ namespace MebelTelegramBot {
             if (text == null)
                 return;
 
-            if (users.ContainsKey(id)) {
-                await users[id].ProcessMessage(text);
+            var user = employeeManager.Get(id);
+            IMsgProcessor processor = new ProcessorsFactory().GetProcessor(botClient, user); //employeeManager.Get(id);
+            if (user != null) {
+                await processor.ProcessMessage(text);
             }
             else {
-                var anon = new Anonymous(botClient, id);
+                var anon = new AnonymousMsgProcessor(botClient, new Anonymous() { Id = id });
                 await anon.ProcessMessage(text);
             }
 
@@ -88,12 +96,12 @@ namespace MebelTelegramBot {
             //}
         }
 
-        private static void UpdateUsers() {
-            var registeredUsers = employeeManager.GetEmployees();
+        //private static void UpdateUsers() {
+        //    var registeredUsers = employeeManager.GetEmployees();
 
-            var managers = users.Where(u => u.Value.GetType() == typeof(Manager)).Select(u => u.Value).ToList();
-            managers.ForEach(m => users.Remove(m.Id));
-            registeredUsers.ForEach(m => users.Add(m.ChatID, new Manager(botClient, m.ChatID)));
-        }
+        //    var managers = users.Where(u => u.Value.GetType() == typeof(Manager)).Select(u => u.Value).ToList();
+        //    managers.ForEach(m => users.Remove(m.Id));
+        //    registeredUsers.ForEach(m => users.Add(m.ChatID, new Manager(botClient, m.ChatID)));
+        //}
     }
 }

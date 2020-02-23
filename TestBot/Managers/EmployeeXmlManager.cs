@@ -8,7 +8,7 @@ using System.Xml;
 using System.Xml.Serialization;
 
 namespace MebelTelegramBot {
-    public class EmployeeManager {
+    public class EmployeeXmlManager {
         string filePath = ".\\Data\\Employees.xml";
 
         public bool Add(string name) {
@@ -65,8 +65,8 @@ namespace MebelTelegramBot {
         public bool Bind(long id, string name) {
             var employees = GetEmployees();
             var employee = employees.FirstOrDefault(e => e.Name == name);
-            if (employee != null && employee.ChatID == 0) {
-                employee.ChatID = id;
+            if (employee != null && employee.Id == 0) {
+                employee.Id = id;
 
                 XmlSerializer serializer = new XmlSerializer(typeof(List<Employee>), new XmlRootAttribute("employees"));
 
@@ -76,10 +76,6 @@ namespace MebelTelegramBot {
                 return true;
             }
             return false;
-        }
-
-        public void SendSummary(Summary sum) {
-           
         }
     }
 }
