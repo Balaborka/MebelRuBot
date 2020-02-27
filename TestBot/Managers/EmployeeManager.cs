@@ -12,13 +12,14 @@ namespace MebelTelegramBot.Managers {
         public EmployeeManager() {
             xmlManager = new EmployeeXmlManager();
             if (!MebelRuBotContext.Employees.Any()) {
-                xmlManager.GetEmployees().ForEach(e => MebelRuBotContext.Employees.Add(new Manager() { Id = e.Id, Name = e.Name }));
+                var employees = xmlManager.GetEmployees();
+                employees.ForEach(e => MebelRuBotContext.Employees.Add(new Manager() { Id = e.Id, Name = e.Name }));
             }
         }
 
         public void Add(Employee user) {
             MebelRuBotContext.Employees.Add(user);
-            xmlManager.Add(user.Name);
+            xmlManager.Add(user.Id, user.Name);
         }
 
         public List<Employee> Get() {

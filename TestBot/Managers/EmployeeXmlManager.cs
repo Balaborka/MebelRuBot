@@ -11,9 +11,9 @@ namespace MebelTelegramBot {
     public class EmployeeXmlManager {
         string filePath = ".\\Data\\Employees.xml";
 
-        public bool Add(string name) {
+        public bool Add(long id, string name) {
             var employees = GetEmployees();
-            Employee employee = new Employee() { Name = name };
+            Employee employee = new Employee() { Id = id, Name = name };
             var empl = ContainsUser(employees, employee);
             if (empl != null)
                 return false;

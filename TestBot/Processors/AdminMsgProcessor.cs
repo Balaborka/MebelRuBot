@@ -155,8 +155,8 @@ namespace MebelTelegramBot {
             Employee.State = AdminState.Add;
 
             var markupReturn = new ReplyKeyboardMarkup(new List<KeyboardButton>() {
-                new KeyboardButton() { Text = textResults } }, true
-             );
+                new KeyboardButton() { Text = textReturn } }, true
+            );
 
             await botClient.SendTextMessageAsync(
                   chatId: Employee.Id,
